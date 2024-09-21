@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Cursor Hangout | The Room</title>
+    <style>
+        body {
+            font-family: Tahoma, "Trebuchet MS", sans-serif;
+            color:white;
+            background-color:black;
+            overflow:hidden;
+            text-align:center;
+            cursor:crosshair;
+        }
+        div.cursor {
+            width:40px;
+            height:40px;
+            outline:1px solid white;
+            border-radius:20px;
+            position:absolute;
+            font-size:30px;
+            z-index:1;
+        }
+        #dots {
+            display:grid;
+            grid-template-columns: auto auto auto;
+        }
+        div.dot {
+            width:6px;
+            height:6px;
+            border-radius:3px;
+            background-color: white;
+            float:center;
+            margin:16.6666666666667vh 16.6666666666667vw;
+        }
+    </style>
+</head>
+<body>
+    <div id="dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+    <div id="area"></div>
+<script>
+    var data = {
+        x:200,
+        y:200,
+        key:location.href.split("/").reverse()[0]
+    }
+    var mice = {};
+    document.addEventListener("mousemove",(evt) => {data = {
+        x:evt.clientX / window.innerWidth * 100,
+        y:evt.clientY / window.innerHeight * 100,
+        key:data.key
+    }});
+    function roundColor(color) {
+        color = color.slice(1);
+        var sum = 0;
+        for(var j = 0; j < 3; j++) {
+            sum += parseInt(color[0] + color[1],16);
+            color = color.slice(2);
+        }
+        return sum < 384 ? "#ffffff" : "#000000";
+    }
+    const interval = setInterval(async()=>{mice = await(await fetch(`/send/${data.key}/${data.x}/${data.y}`)).json();update()},100);
+    function update() {
+        if(mice.length == 0)
+            location.replace("/expired");
+        document.getElementById("area").innerHTML = "";
+        for(var i of mice) {
+            document.getElementById("area").innerHTML += `<div class="cursor"style="background-color:${i.color};color:${roundColor(i.color)};left:calc(${i.x}vw - 20px);outline-color:${roundColor(i.color)};top:calc(${i.y}vh - 20px);">${i.name}</div>`;
+        }
+    }
+
+</script>
+</body>
+</html>
